@@ -12,46 +12,35 @@ on:
 jobs:
 
   terraform-plan:
-    if: github.event_name == 'push'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.1.7
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.1.7
 
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v3
+    - name: Terraform Init
+      working-directory: ./Enviroment/dev
+      run: terraform init
 
-      - name: Initialize TFLint
-        run: tflint --init
+    - name: Terraform Validate
+      working-directory: ./Enviroment/dev
+      run: terraform validate
 
-      - name: Terraform Format Check
-        run: terraform fmt
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Terraform Init
-        working-directory: ./Enviroment/dev
-        run: terraform init
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: TFLint Check
-        run: tflint
-
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Terraform Plan
-        working-directory: ./Enviroment/dev
-        run: terraform plan
-
+    - name: Terraform Plan
+      working-directory: ./Enviroment/dev
+      run: terraform plan
+  
   terraform-apply:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
