@@ -64,3 +64,5 @@ module "bastion" {
   public_ip_address_id = module.pip.pip_ids["bastion_pip"]
 }
 
+
+
